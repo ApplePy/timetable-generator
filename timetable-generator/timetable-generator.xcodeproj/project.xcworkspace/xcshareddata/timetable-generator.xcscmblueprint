@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "F408446C4C6D1C7DE7025FB50E91B1B76439DDB4",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "F408446C4C6D1C7DE7025FB50E91B1B76439DDB4" : 0,
+    "B08156DDD97AB15A5D356D4D56FBF652F9A3C89E" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "DF736819-09CF-406B-A044-B3654082B2FD",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "F408446C4C6D1C7DE7025FB50E91B1B76439DDB4" : "timetable-generator\/",
+    "B08156DDD97AB15A5D356D4D56FBF652F9A3C89E" : "timetable-generator\/timetable-generator\/timetable-generator\/json11\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "timetable-generator",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 203,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "timetable-generator\/timetable-generator.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/dropbox\/json11.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "B08156DDD97AB15A5D356D4D56FBF652F9A3C89E"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "incode.ca:Darryl\/timetable-generator.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "F408446C4C6D1C7DE7025FB50E91B1B76439DDB4"
+    }
+  ]
+}
