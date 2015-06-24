@@ -23,47 +23,52 @@
 using namespace std;
 using namespace Json;
 
+
+
+// GLOBAL FUNCTIONS
+
 mutex globalMutex;
+const vector<string> components = {"c","tu", "l"}; //Holds the class components of a course
 
 
-//There's a problem where if the course code is missing an A or B, the placement of the name is shifted over one
 
+//FUNCTIONS
+
+///Lists the contents of a Json::Value, returns the number of items listed.
 int list_object (const Json::Value& list, const bool withNumbers = false, const bool listKeys = false, vector<string> keys = vector<string>(), const bool displayObjectKeysInsideArray = false) {
     
-    /// Note, listing the keys of an array of objects makes no sense.
+    // NOTE: listing the keys of an array of objects makes no sense.
     
     Value::iterator listIterator;
     vector <string> keyList;
+    int counter = 0;
+
     if (list.isObject())
         keyList = list.getMemberNames();
-    int counter = 0;
     
-    
+    // Iterate through the contents of a JSON Value
     for (listIterator = list.begin(), counter = 0; listIterator != list.end(); counter++, listIterator++) {
+        string extra;
         
-        string extra = "";
-        
+        //Add numbers, and pad with spaces as necessary
         if (withNumbers) {
             extra = to_string(counter + 1) + ":";
             while (extra.length() < 7)
                 extra += " ";
         }
         
-        if (listKeys == true && list.isObject()) //it's an object and listKeys is listed, iterator goes through keys
+        if (listKeys == true && list.isObject()) //it's an object and listKeys is listed, iterator lists the keys
             cout << extra << keyList[counter] << endl;
-        //else if (listKeys == false && displayObjectKeysInsideArray == false && keys.empty())
-            //cout << extra << *listIterator << endl;
-        else if (!keys.empty() && list.isObject()) { //iterator goes through keys
+        else if (!keys.empty() && list.isObject()) { //its an object/map, the keys aren't to be listed, and there are specific key(s) that want to be listed, iterator lists key(s) contents on a single line
             bool found = false;
             
-            for (int i = 0; i < keyList.size(); i++) {
-                if (keyList[counter] == keys[i]) {
+            //Search the keys in the object for matches with the keys desired, indicate if search is successful
+            for (int i = 0; i < keyList.size() && !found; i++) {
+                if (keyList[counter] == keys[i])
                     found = true;
-                    break;
-                }
             }
             
-            // if a match was found, write to extra and output, else decrement counter so that the next object is logically numbered on the output
+            // if a match was found, write the key's contents to extra and send extra to output, else decrement counter so that the next object is logically numbered on the output
             if (found) {
                 extra += list.get(keys.back(), Json::Value()).asString() + " ";
                 cout << extra << endl;
@@ -76,20 +81,29 @@ int list_object (const Json::Value& list, const bool withNumbers = false, const 
                 extra += list[counter].get(keys[i], Json::Value()).asString() + " ";
             cout << extra << endl;
         }
-        else
+        else //If all else fails, just spit the raw contents of the json value out to screen
             cout << extra << *listIterator << endl;
     }
     
     return counter;
 }
 
-
+/**Combines the listing of a Json::value with asking what option they want to choose, with the appropriate error checking.
+ 
+ Returns: 0, 1, 2
+ 
+ 0 if successful.
+ 
+ 1 if the user signalled to exit without making a choice.
+ 
+ 2 if an unexpected error has occurred.
+ */
 int list_and_get(const Json::Value& list, const bool withNumbers = false, string * const retVal = NULL, const bool listKeys = false, const vector<string> keys = vector<string>(), const bool displayObjectKeysInsideArray = false) {
     
         list_object(list, withNumbers, listKeys, keys, displayObjectKeysInsideArray);
     
     if (retVal != NULL) {
-        int ret = -1; //will overflow to the max int size
+        int ret = -1;
         cout << endl << "Select an option from the list above (press 0 to exit): ";
         cin >> ret;
         while (ret > list.size()) {
@@ -102,30 +116,32 @@ int list_and_get(const Json::Value& list, const bool withNumbers = false, string
         if (ret == 0)
             return 1;
         
+        //Increment the iterator to the desired position
         Value::iterator iterator = list.begin();
         for (int i = 0; i < ret - 1; i++)
             iterator++;
+        
+        //Figure out how to return the object appropriately.
         if (list.isObject())
             *retVal = iterator->asString();
         else if (list.isArray())
             *retVal = to_string(ret - 1);
         else
             return 2;
+        
         return 0;
     }
     else
         return 0;
 }
 
-
-
-
 ///Creates a vector containing the range of numbers between begin and end, inclusive, by a set interval between numbers
 vector<int> range(const int begin, const int end, const int interval = 1) {
     vector<int> result;
-    for (int i = begin; i <= end; i += interval){
+    
+    for (int i = begin; i <= end; i += interval)
         result.push_back(i);
-    }
+
     //sort(result.begin(), result.end()); //result should be sorted already by design
     return result;
 }
@@ -151,8 +167,10 @@ double geometric_mean(const vector<double>& listOfWeightings) {
 
 double mean(const vector<double>& listOfWeightings) {
     double total = 0;
+    
     for (auto iter = listOfWeightings.begin(); iter != listOfWeightings.end(); iter++)
         total+= *iter;
+    
     return (total/(listOfWeightings.end()-listOfWeightings.begin()));
 }
 
@@ -161,24 +179,18 @@ int time_conversion(const int hour, const int minute) {
     return (hour - 8) * 60 + (minute - 30);
 }
 
-
-
-
 ///"weight_course" helper function
 double weight_time(const int startTime, const int endTime) {
     double weight = 1;  // Since starting weight is determined by an upper function
-
-    const vector<int> lunchSet = range(time_conversion(12, 00), time_conversion(1, 00));
+    const vector<int> lunchSet = range(time_conversion(12, 01), time_conversion(12, 59)); //Times changed so that courses that start at 12 or 1 aren't incorrectly penalized
     const vector<int> classSet = range(startTime, endTime);
     vector<int> result ((lunchSet.size() > classSet.size()) ? lunchSet.size() : classSet.size()); //make result the size of the bigger set
     
     vector<int>::const_iterator end = set_intersection(lunchSet.begin(),lunchSet.end(), classSet.begin(), classSet.end(), result.begin());
-    
     result.resize(end - result.begin()); //shink result vector to necessary size only
     
     if (result.size() > 0)
         weight -= 800;
-    
     weight -= pow(startTime, 1.2);
     weight += (endTime - startTime) * 5;
     
@@ -187,22 +199,23 @@ double weight_time(const int startTime, const int endTime) {
 
 ///"weight_course" helper function
 void weight_component(Value& course, const string selector) {
+    assert(course[selector].isArray()); //QUICK DEBUG CODE
     Value& component = course[selector];
-    assert(component.isArray());
-    unsigned int count = component.end() - component.begin();  // counts the number of sections in this course's component
-    Value::iterator sectIterator;
     
-    
-    for (sectIterator = component.begin(); sectIterator != component.end(); sectIterator++) {  // for each section in this course component
+    //For each section in this course component...
+    for (auto sectIterator = component.begin(); sectIterator != component.end(); sectIterator++) {
         vector<double> weightList;
         Value& times = (*sectIterator)["ti"];
         
-        for (auto timeSlot = times.begin(); timeSlot != times.end(); timeSlot++) {  // and for each time slot taken in this section's course component
-            weightList.push_back(5000 + weight_time(time_conversion((*timeSlot)[2].asInt(), (*timeSlot)[3].asInt()),time_conversion((*timeSlot)[4].asInt(), (*timeSlot)[5].asInt()))); // calculate the weighting of each time slot
+        // ...and for each time slot taken in this section's course component...
+        for (auto timeSlot = times.begin(); timeSlot != times.end(); timeSlot++) {
+            // calculate the weighting of each time slot, and insert into the weightList
+            weightList.push_back(5000 + weight_time(time_conversion((*timeSlot)[2].asInt(), (*timeSlot)[3].asInt()),time_conversion((*timeSlot)[4].asInt(), (*timeSlot)[5].asInt())));
         }
         auto sectionWeight = mean(weightList);  // the section's final weight: geometric mean of the weight of each of its time slots
-        sectionWeight -= (log10(count) * 1000);  // decrease the section weight by the number of sections
+        sectionWeight -= (log10(component.end() - component.begin()) * 1000);  // decrease the section weight by the number of sections
         
+        //If the teacher of the section is Quazi, add 5000 to the weighting
         for (auto teacherIter = (*sectIterator)["sups"].begin(); teacherIter != (*sectIterator)["sups"].end(); teacherIter++) {
             if (teacherIter->asString() == string("Rahman")) {
                 sectionWeight += 5000;
@@ -210,7 +223,7 @@ void weight_component(Value& course, const string selector) {
             }
         }
         
-        
+        //Write the calculated weight to the section
         globalMutex.lock();
         (*sectIterator)["sw"] = sectionWeight;  // tag each section with it's weight
         globalMutex.unlock();
@@ -235,44 +248,43 @@ void weight_component(Value& course, const string selector) {
  If a class is taught by Quazi Rahman, it gets added a 5000 weighting
  */
 void weight_course(vector<Value>::iterator coursePtr) {
-    Value& course = *coursePtr;
-    assert(course.isObject());
+    assert(coursePtr->isObject()); //QUICK DEBUG CODE
+
     // weight each lecture
-    if (course.isMember("c"))
-        weight_component(course, "c");
-
-    // weight each tutorial
-    if (course.isMember("tu"))
-        weight_component(course, "tu");
-
-    // weight each lab
-    if (course.isMember("l"))
-        weight_component(course, "l");
+    for (auto i = components.begin(); i != components.end(); i++)
+        if (coursePtr->isMember(*i))
+            weight_component(*coursePtr, *i);
 }
 
-
-
+///Joins all threads in a thread-containing vector.
 void closeAllThreads (vector<thread>* globalThreadIndex) {
-    assert(globalThreadIndex != NULL);
+    assert(globalThreadIndex != NULL);  //QUICK DEBUG CODE
+    
     for (auto iter = globalThreadIndex->end() - 1; !globalThreadIndex->empty(); iter--) {
         if (iter->joinable())
             iter->join();
         globalThreadIndex->pop_back();
     }
+    globalThreadIndex->shrink_to_fit(); //resizes the thread array to no longer take up the space it previously consumed on the heap.
 }
 
-
-
-
-
+///Generates the permutations of classes, lectures, and tutorials in a given course.
 void generateClassVariations(const vector<vector<string>::const_iterator>& componentIters, const unsigned int counter, vector<unsigned short>* inputArrayPosition, vector<Value>& output, const Value& input) {
-    //If this is the end of the nested function structure, copy the input Value to a new spot in output; then using the position numbers from inputArrayPosition, overwrite the components indicated in componentIters by the entry in Input indicated by inputPosition
+    //If this is the end of the nested function structure, copy the input Value to a new spot in output; then using the position numbers from inputArrayPosition, overwrite the components indicated in componentIters by the entry in Input indicated by inputPosition, else just pass it farther down the chain.
     for (int i = 0; i < input[*componentIters[counter]].size(); i++) {
         inputArrayPosition->at(counter) = i;
         if (counter == componentIters.size() - 1) {
+            if (output.size() == output.capacity()) //QUICK DEBUG CODE
+                cerr << "Possible vector reallocation is about to occur in generateClassVariations." << endl;
             output.push_back(input);
-            for (int n = 0; n < componentIters.size(); n++)
-                output[output.size() - 1][*componentIters[n]] = {input[*componentIters[n]][inputArrayPosition->at(n)]};
+            for (int n = 0; n < componentIters.size(); n++) {
+                Value temp (arrayValue);
+                
+                temp[0] = input[*componentIters[n]][inputArrayPosition->at(n)];
+                output[output.size() - 1][*componentIters[n]] = temp;
+                
+                //NOTE: some inefficiency in here (copying to a temporary variable only to copy it again), something to change later
+            }
         }
         else
             generateClassVariations(componentIters, counter + 1, inputArrayPosition, output, input);
@@ -283,10 +295,27 @@ void generateClassVariations(const vector<vector<string>::const_iterator>& compo
         delete inputArrayPosition;
 }
 
-
+///Sets up for the generateClassVariations function, used primarily for multithreading
+void GCVSetup (vector<vector<Value>>::iterator configIter, vector<Value>::const_iterator classIterator) {
+    vector<Value>& courseVariations = *(configIter);
+    
+    /* A high-level explanation for the mess below:
+     The following code creates a variable length array that points to each of the key names listed in the "components" array. It then ensures that every pointer points to a valid key in the class object, discarding the invalid pointers. The data is then fed into a recursive function that works as a variable-depth nested for loop to append the course variations to the given array
+     */
+    vector<vector<string>::const_iterator> componentIters;
+    
+    //Initialize componentIters, ensuring they're valid
+    for (auto iter = components.begin(); iter != components.end(); iter++) {
+        if (classIterator->isMember(*iter))
+            componentIters.push_back(iter);
+    }
+    
+    generateClassVariations(componentIters, 0, new vector<unsigned short>  (componentIters.size(), 0), courseVariations, *classIterator); // NOTE: DYNAMIC ALLOCATION HERE
+}
 
 
 /* NOTES TO DO:
+ CLEAN UP MAIN!
  OPTIMIZE VECTOR MEMORY USAGE!
  LOOK INTO USING THE HEAP WHERE APPROPRIATE!
  */
@@ -308,19 +337,20 @@ int main(int argc, const char * argv[]) {
         stringstream buffer;
         buffer << file.rdbuf();
         
-        Json::Value root; //consider building this in the heap instead
+        Json::Value root;
         Json::CharReaderBuilder rbuilder;
         rbuilder["collectComments"] = false;
         std::string errs;
         bool ok = Json::parseFromStream(rbuilder, buffer, &root, &errs);
         
         if (!ok) {
-            cout << "Failed to parse JSON string! Aborting..." << endl;
+            cout << "Failed to parse JSON string! Errors: " << errs << endl;
             return 2;
         }
         
         int intRet = 0;
         vector<Value> classes;
+        
         while (intRet == 0) {
             string departmentToGet(""), courseToGet("");
             intRet = list_and_get(root["departments"], true, &departmentToGet, true);
@@ -335,28 +365,25 @@ int main(int argc, const char * argv[]) {
         
         closeAllThreads(&globalThreadIndex);
 
-        //Now create array of possible configurations for each course
-        vector<vector<Value>> courseConfigurations;
+        //Now create array of possible configurations for each course, and reserve enough space for each
+        vector<vector<Value>> courseConfigurations (classes.size(), vector<Value>());
+        auto configIter = courseConfigurations.begin();
+        for (int i = 0; i < courseConfigurations.size(); i++)
+            courseConfigurations[i].reserve(100);
+        
         
         //Iterate through each course, generating the variations
-        for (vector<Value>::const_iterator iterator = classes.begin(); iterator != classes.end(); iterator++) {
-            courseConfigurations.push_back(vector<Value>());
-            vector<Value>& courseVariations = *(courseConfigurations.end() - 1);
-
-            /* A high-level explanation for the mess below:
-             The following code creates a variable length array that points to each of the key names listed in the "components" array. It then ensures that every pointer points to a valid key in the class object, discarding the invalid pointers. The data is then fed into a recursive function that works as a variable-depth nested for loop to append the course variations to the given array
-             */
-            const vector<string> components = {"c","tu", "l"};
-            vector<vector<string>::const_iterator> componentIters;
-            
-            //Initialize componentIters, ensuring they're valid
-            for (auto iter = components.begin(); iter != components.end(); iter++) {
-                if (iterator->isMember(*iter))
-                    componentIters.push_back(iter);
-            }
-            
-            generateClassVariations(componentIters, 0, new vector<unsigned short>  (componentIters.size(), 0), courseVariations, *iterator); // NOTE: DYNAMIC ALLOCATION HERE
+        for (vector<Value>::const_iterator iterator = classes.begin(); iterator != classes.end(); iterator++, configIter++) {
+            globalThreadIndex.push_back(thread(GCVSetup,configIter, iterator));
         }
+        
+        closeAllThreads(&globalThreadIndex);
+        
+        //Shrink all the class allocations down to their real size
+        for (auto i = courseConfigurations.begin(); i != courseConfigurations.end(); i++) {
+            i->shrink_to_fit();
+        }
+        
         
     }
     else {
