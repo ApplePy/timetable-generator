@@ -24,7 +24,6 @@ using namespace std;
 using namespace Json;
 
 mutex globalMutex;
-vector<thread> globalThreadIndex;
 
 
 //There's a problem where if the course code is missing an A or B, the placement of the name is shifted over one
@@ -118,6 +117,9 @@ int list_and_get(const Json::Value& list, const bool withNumbers = false, string
         return 0;
 }
 
+
+
+
 ///Creates a vector containing the range of numbers between begin and end, inclusive, by a set interval between numbers
 vector<int> range(const int begin, const int end, const int interval = 1) {
     vector<int> result;
@@ -128,6 +130,7 @@ vector<int> range(const int begin, const int end, const int interval = 1) {
     return result;
 }
 
+/* UNUSED FUNCTIONS
 double iroot(double k, double n) {  // Finds the nth root of a number, where n is the number, and k is the root
     double u (n), s (n+1);
     while (u < s) {
@@ -144,6 +147,7 @@ double geometric_mean(const vector<double>& listOfWeightings) {
         total += *weightIterator;
     return iroot(listOfWeightings.size(), total);
 }
+ */
 
 double mean(const vector<double>& listOfWeightings) {
     double total = 0;
@@ -156,6 +160,9 @@ double mean(const vector<double>& listOfWeightings) {
 int time_conversion(const int hour, const int minute) {
     return (hour - 8) * 60 + (minute - 30);
 }
+
+
+
 
 ///"weight_course" helper function
 double weight_time(const int startTime, const int endTime) {
@@ -244,7 +251,55 @@ void weight_course(vector<Value>::iterator coursePtr) {
 }
 
 
+
+void closeAllThreads (vector<thread>* globalThreadIndex) {
+    assert(globalThreadIndex != NULL);
+    for (auto iter = globalThreadIndex->end() - 1; !globalThreadIndex->empty(); iter--) {
+        if (iter->joinable())
+            iter->join();
+        globalThreadIndex->pop_back();
+    }
+}
+
+
+
+
+
+void generateClassVariations(const vector<vector<string>::const_iterator>& componentIters, const unsigned int counter, vector<unsigned short>* inputArrayPosition, vector<Value>& output, const Value& input) {
+    //If this is the end of the nested function structure, copy the input Value to a new spot in output; then using the position numbers from inputArrayPosition, overwrite the components indicated in componentIters by the entry in Input indicated by inputPosition
+    for (int i = 0; i < input[*componentIters[counter]].size(); i++) {
+        inputArrayPosition->at(counter) = i;
+        if (counter == componentIters.size() - 1) {
+            output.push_back(input);
+            for (int n = 0; n < componentIters.size(); n++)
+                output[output.size() - 1][*componentIters[n]] = {input[*componentIters[n]][inputArrayPosition->at(n)]};
+        }
+        else
+            generateClassVariations(componentIters, counter + 1, inputArrayPosition, output, input);
+    }
+    
+    //When this function is done, the inputArrayPosition vector that was dynamically allocated is no longer needed. Delete it to prevent a memory leak.
+    if (counter == 0)
+        delete inputArrayPosition;
+}
+
+
+
+
+/* NOTES TO DO:
+ OPTIMIZE VECTOR MEMORY USAGE!
+ LOOK INTO USING THE HEAP WHERE APPROPRIATE!
+ */
+
+
+
+
+
+
+
 int main(int argc, const char * argv[]) {
+    
+    vector<thread> globalThreadIndex;
     
     // Make an HTTP request to http://www.timetablegenerator.com/sched.php?data="western" to get JSON
     
@@ -253,7 +308,7 @@ int main(int argc, const char * argv[]) {
         stringstream buffer;
         buffer << file.rdbuf();
         
-        Json::Value root;
+        Json::Value root; //consider building this in the heap instead
         Json::CharReaderBuilder rbuilder;
         rbuilder["collectComments"] = false;
         std::string errs;
@@ -278,28 +333,29 @@ int main(int argc, const char * argv[]) {
         for (auto iterator = classes.begin(); iterator != classes.end(); iterator++)
             globalThreadIndex.push_back(thread(weight_course,iterator));
         
-        for (auto iter = globalThreadIndex.end() - 1; !globalThreadIndex.empty(); iter--) {
-            if (iter->joinable())
-                iter->join();
-            globalThreadIndex.pop_back();
-        }
+        closeAllThreads(&globalThreadIndex);
 
         //Now create array of possible configurations for each course
         vector<vector<Value>> courseConfigurations;
+        
+        //Iterate through each course, generating the variations
         for (vector<Value>::const_iterator iterator = classes.begin(); iterator != classes.end(); iterator++) {
-            Value workingClass = *iterator; //holds the copy of the class in question that gets edited
-            vector<Value> courses;
+            courseConfigurations.push_back(vector<Value>());
+            vector<Value>& courseVariations = *(courseConfigurations.end() - 1);
+
+            /* A high-level explanation for the mess below:
+             The following code creates a variable length array that points to each of the key names listed in the "components" array. It then ensures that every pointer points to a valid key in the class object, discarding the invalid pointers. The data is then fed into a recursive function that works as a variable-depth nested for loop to append the course variations to the given array
+             */
             const vector<string> components = {"c","tu", "l"};
-            for(auto iter1 = components.begin(); iter1 != components.end();) {
-                //if the component pointed to by iter# does not exist in the course, increment counter and continue.
-                for (auto iter2 = iter1 + 1; iter2 != components.end();) {
-                    //if the component pointed to by iter# does not exist in the course, increment counter and continue.
-                    for (auto iter3 = iter2 + 1; iter3 != components.end();){
-                        //if the component pointed to by iter# does not exist in the course, increment counter and continue.
-                        // NOTE: somewhere in here, there needs to be an iterator in the three 'for' loops that iterate through the classes' available section slots, once the for loops are assigned the appropriate section to search. At the end of each of the 'for' blocks should be the update code to write the selected section to the selected component.
-                    }
-                }
+            vector<vector<string>::const_iterator> componentIters;
+            
+            //Initialize componentIters, ensuring they're valid
+            for (auto iter = components.begin(); iter != components.end(); iter++) {
+                if (iterator->isMember(*iter))
+                    componentIters.push_back(iter);
             }
+            
+            generateClassVariations(componentIters, 0, new vector<unsigned short>  (componentIters.size(), 0), courseVariations, *iterator); // NOTE: DYNAMIC ALLOCATION HERE
         }
         
     }
