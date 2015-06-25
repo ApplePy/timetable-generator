@@ -13,7 +13,7 @@
 #include <algorithm>
 //#include <list>
 //#include <set>
-//#include <map>
+#include <unordered_map>
 #include <cmath>
 #include <thread>
 #include <mutex>
@@ -32,7 +32,7 @@ const vector<string> components = {"c","tu", "l"}; //Holds the class components 
 
 
 
-//FUNCTIONS
+// FUNCTIONS
 
 ///Lists the contents of a Json::Value, returns the number of items listed.
 int list_object (const Json::Value& list, const bool withNumbers = false, const bool listKeys = false, vector<string> keys = vector<string>(), const bool displayObjectKeysInsideArray = false) {
@@ -139,8 +139,9 @@ int list_and_get(const Json::Value& list, const bool withNumbers = false, string
 vector<int> range(const int begin, const int end, const int interval = 1) {
     vector<int> result;
     
-    for (int i = begin; i <= end; i += interval)
+    for (int i = begin; i <= end; i += interval) {
         result.push_back(i);
+    }
 
     //sort(result.begin(), result.end()); //result should be sorted already by design
     return result;
@@ -274,8 +275,6 @@ void generateClassVariations(const vector<vector<string>::const_iterator>& compo
     for (int i = 0; i < input[*componentIters[counter]].size(); i++) {
         inputArrayPosition->at(counter) = i;
         if (counter == componentIters.size() - 1) {
-            if (output.size() == output.capacity()) //QUICK DEBUG CODE
-                cerr << "Possible vector reallocation is about to occur in generateClassVariations." << endl;
             output.push_back(input);
             for (int n = 0; n < componentIters.size(); n++) {
                 Value temp (arrayValue);
@@ -306,18 +305,183 @@ void GCVSetup (vector<vector<Value>>::iterator configIter, vector<Value>::const_
     
     //Initialize componentIters, ensuring they're valid
     for (auto iter = components.begin(); iter != components.end(); iter++) {
-        if (classIterator->isMember(*iter))
+        if (classIterator->isMember(*iter)) {
             componentIters.push_back(iter);
+        }
     }
     
     generateClassVariations(componentIters, 0, new vector<unsigned short>  (componentIters.size(), 0), courseVariations, *classIterator); // NOTE: DYNAMIC ALLOCATION HERE
 }
+
+/**
+ Creates every possible combination out of the data from input
+ 
+ NOTE: FIND A WAY TO MAKE THIS ALGORITHM MULTITHREADED-FRIENDLY AND NOT VULNERABLE TO REALLOCATION!
+ */
+void generateCombinations(vector<vector<Value>>* const input, vector<vector<Value*>>* const output, unsigned int counter = 0) {
+    
+    // ****** THIS FUNCTION IS VULNERABLE TO REALLOCATIONS ******
+    
+    // If this is the end of the input vector, wrap in a vector and copy the contents directly into output
+    if (counter == input->size() - 1) {
+        for (auto iter = input->at(counter).begin(); iter != input->at(counter).end(); iter++) {
+            output->push_back(vector<Value*>());
+            (output->end() - 1)->push_back(&*iter);
+        }
+    }
+    //If this is not the end, pass it farther down, duplicate the existing entries as necessary, then append the appropriate additions on
+    else {
+        generateCombinations(input, output, counter + 1);
+        auto endIter = output->end(); //holds the end pointer for the original output so that the copier knows where to stop reading its source material
+        auto sz = output->size();
+        
+        // Iterate through the input container's list of course variations, and duplicate the output vector as necessary to append this class
+        for (auto i = input->at(counter).begin(); i != input->at(counter).end(); i++) {
+            for (auto n = output->begin(); n != endIter; n++) {
+                output->push_back(*n);
+            }
+        }
+        
+        //Append classes
+        unsigned int offset = 0;
+        for (auto i = input->at(counter).begin(); i != input->at(counter).end(); i++) {
+            for (auto n = output->begin() + offset; n != endIter + offset && n != output->end(); n++) {
+                n->push_back(&*i);
+            }
+            offset += sz;
+        }
+    }
+    
+    
+    
+    /*
+    vector<Value> newList;
+    vector<Value> existingList;
+    if (input->size() > 1) {
+        for (item in inputData[1:len(inputData)])
+            newList.append(item);
+        existingList = generate_combinations(newList);
+    }
+    // Take the returned list of combinations of previous courses, and add in new versions with this course in it
+    vector <Value> newGenList;
+    unsigned int counter = 0;
+    for (version in inputData[0]) {
+        
+        if (len(existingList) == 0) {
+            newGenList.append([version]);
+        }
+        else {
+            for (item in existingList) {
+                newGenList.append(deepcopy(item));
+            }
+            for (existVer in existingList) {
+                newGenList[counter].append(version);
+                counter += 1;
+            }
+        }
+    }
+    return newGenList;
+     */
+}
+
+///Takes a schedule array, and figures out if it contains a conflict
+void testForConflict (const vector<Value*>* const input, vector<bool>::iterator resultOut) {
+    // NOTE: For some reason the referencing of a bool value in a vector returns an iterator rather than an address... hence the bool iterator rather than 'bool* const'
+    
+    auto empty = vector<int>();
+    unordered_map<string, vector<int>> setsOfTimes [2] = {
+        {
+            {"mo", empty},
+            {"tu", empty},
+            {"we", empty},
+            {"th", empty},
+            {"fr", empty}
+        }
+    };
+    
+    //Iterate through the courses
+    for (auto coursePtr = input->begin(); coursePtr != input->end(); coursePtr++) {
+        
+        // NOTE: THE FOLLOWING SECTION WAS COPIED FROM ELSEWHERE! TRY TO ENCAPSULATE INTO A FUNCTION!
+        vector<vector<string>::const_iterator> componentIters;
+        Value& course = **coursePtr;
+        
+        //Initialize componentIters, ensuring they're valid
+        for (auto iter = components.begin(); iter != components.end(); iter++) {
+            if (course.isMember(*iter)) {
+                componentIters.push_back(iter);
+            }
+        }
+        // END NOTE
+        
+        //Iterate through the course's times, create the time set, compare it with setsOfTimes, and append if no intersection, quit otherwise
+        for (auto componentPtr = componentIters.begin(); componentPtr != componentIters.end(); componentPtr++) {
+            const string& component = **componentPtr;
+            
+            for (auto timePtr = course[component][0]["ti"].begin(); timePtr != course[component][0]["ti"].end(); timePtr++) {
+                Value& time = *timePtr;
+                assert(time.isArray()); // QUICK DEBUG CODE
+                // NOTE: THE FOLLOWING SECTION WAS COPIED AND MODIFIED FROM ELSEWHERE! TRY TO ENCAPSULATE INTO A FUNCTION!
+                auto proposedTime = range(time_conversion(time[2].asInt(), time[3].asInt()), time_conversion(time[4].asInt(), time[5].asInt()));
+                vector<int> result [2];
+                
+                // NOTE: CODE COPIED AND PASTED! REFACTOR!
+                switch (time[0].asInt()) {
+                    case 3:
+                    case 1: {
+                        assert(false); //The line below has an invalid pointer issue, investigate.
+                        vector<int>::const_iterator end = set_intersection(proposedTime.begin(),proposedTime.end(), setsOfTimes[0][time[1].asString()].begin(), setsOfTimes[0][time[1].asString()].end(), result[0].begin());
+                        result[0].resize(end - result[0].begin()); //shink result vector to necessary size only
+                        if ( time[0].asInt() == 1) //Allows for 3 to fall through
+                            break;
+                    }
+                    case 2: {
+                        vector<int>::const_iterator end = set_intersection(proposedTime.begin(),proposedTime.end(), setsOfTimes[1][time[1].asString()].begin(), setsOfTimes[1][time[1].asString()].end(), result[1].begin());
+                        result[1].resize(end - result[1].begin()); //shink result vector to necessary size only
+                        break;
+                    }
+                    default:
+                        throw ("JSON structure corrupted! Course " + course["n"].asString() + " has a bad term condition!");
+                        break;
+                }
+                
+                //If conflict detected, signal conflict and quit function, else append to map
+                if (result[0].size() > 0 || result[1].size() > 0) {
+                    // END NOTE
+                    *resultOut = true;
+                    return;
+                }
+                else {
+                    switch (time[0].asInt()) {
+                        case 3:
+                        case 1:
+                            setsOfTimes[0][time[1].asString()].insert(setsOfTimes[0][time[1].asString()].end(), proposedTime.begin(), proposedTime.end()); //Concatenate the proposed time and the canonical
+                            sort(setsOfTimes[0][time[1].asString()].begin(), setsOfTimes[0][time[1].asString()].end()); //Sort the canonical time so that set_intersection works properly
+                            if ( time[0].asInt() == 1) //Allows for 3 to fall through
+                                break;
+                        case 2:
+                            setsOfTimes[1][time[1].asString()].insert(setsOfTimes[1][time[1].asString()].end(), proposedTime.begin(), proposedTime.end()); //Concatenate the proposed time and the canonical
+                            sort(setsOfTimes[1][time[1].asString()].begin(), setsOfTimes[1][time[1].asString()].end()); //Sort the canonical time so that set_intersection works properly
+                            break;
+                        default:
+                            throw ("JSON structure corrupted! Course " + course["n"].asString() + " has a bad term condition!");
+                            break;
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
 
 
 /* NOTES TO DO:
  CLEAN UP MAIN!
  OPTIMIZE VECTOR MEMORY USAGE!
  LOOK INTO USING THE HEAP WHERE APPROPRIATE!
+ FIX CONST AND VECTORS/NESTED VECTORS!
  */
 
 
@@ -384,7 +548,25 @@ int main(int argc, const char * argv[]) {
             i->shrink_to_fit();
         }
         
+        vector<vector<Value*>> output; // Consider changing this to a list instead to escape reallocation hell
+        output.reserve(1000000000); //Reserve space for one trillion combinations... may need more
+        generateCombinations(&courseConfigurations, &output); //Find a way to multithread this
         
+        vector<bool> conflictVector(output.size(), false); //Holds the list of timetable variations that are known to have conflicts
+        for (auto i = 0; i < output.size(); i++)
+            //testForConflict(&(output[i]), &(conflictVector[i]));
+            globalThreadIndex.push_back(thread(testForConflict, &(output[i]), &(conflictVector[i])));
+        
+        closeAllThreads(&globalThreadIndex);
+        
+        //Discard all the schedule variations with conflicts
+        for (auto conflict = conflictVector.end() - 1; conflict != conflictVector.begin() - 1; conflict--) {
+            if (*conflict)
+                conflictVector.erase(conflict);
+        }
+        
+        
+        cout << output[0].size() << " test " << output.size() << endl;
     }
     else {
         cout << "The JSON file could not be read!" << endl;
