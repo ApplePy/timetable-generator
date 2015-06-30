@@ -11,7 +11,7 @@
 #include <fstream>
 #include <string>
 #include <algorithm>
-//#include <list>
+#include <list>
 //#include <set>
 #include <unordered_map>
 #include <cmath>
@@ -19,6 +19,7 @@
 #include <mutex>
 #include <assert.h>
 #include "dist/json/json.h"
+#include "timer.hpp"
 
 using namespace std;
 using namespace Json;
@@ -27,12 +28,26 @@ using namespace Json;
 
 // GLOBAL FUNCTIONS
 
+timer globalTimer;
 mutex globalMutex;
 const vector<string> components = {"c","tu", "l"}; //Holds the class components of a course
+list <void *> dynamicAllocations; //TOTAL KLUDGE! USED AS PAPERING OVER BAD DESIGN! FIX!
 
 
 
 // FUNCTIONS
+
+///Strips the leading and trailing " symbols from JsonObjects
+inline string quoteStripper(string input) {
+    if (input.size() == 0)
+        return input;
+    if (input[input.size() - 1] == '\"')
+        input.erase(input.end() -1);
+    if (input[0] == '\"')
+        input.erase(input.begin());
+    
+    return input;
+}
 
 ///Lists the contents of a Json::Value, returns the number of items listed.
 int list_object (const Json::Value& list, const bool withNumbers = false, const bool listKeys = false, vector<string> keys = vector<string>(), const bool displayObjectKeysInsideArray = false) {
@@ -176,7 +191,7 @@ double mean(const vector<double>& listOfWeightings) {
 }
 
 ///This function converts regular times into a minutes-from-8:30am integer
-int time_conversion(const int hour, const int minute) {
+inline int time_conversion(const int hour, const int minute) {
     return (hour - 8) * 60 + (minute - 30);
 }
 
@@ -351,44 +366,15 @@ void generateCombinations(vector<vector<Value>>* const input, vector<vector<Valu
             offset += sz;
         }
     }
-    
-    
-    
-    /*
-    vector<Value> newList;
-    vector<Value> existingList;
-    if (input->size() > 1) {
-        for (item in inputData[1:len(inputData)])
-            newList.append(item);
-        existingList = generate_combinations(newList);
-    }
-    // Take the returned list of combinations of previous courses, and add in new versions with this course in it
-    vector <Value> newGenList;
-    unsigned int counter = 0;
-    for (version in inputData[0]) {
-        
-        if (len(existingList) == 0) {
-            newGenList.append([version]);
-        }
-        else {
-            for (item in existingList) {
-                newGenList.append(deepcopy(item));
-            }
-            for (existVer in existingList) {
-                newGenList[counter].append(version);
-                counter += 1;
-            }
-        }
-    }
-    return newGenList;
-     */
 }
 
 ///Takes a schedule array, and figures out if it contains a conflict
 void testForConflict (const vector<Value*>* const input, vector<bool>::iterator resultOut) {
     // NOTE: For some reason the referencing of a bool value in a vector returns an iterator rather than an address... hence the bool iterator rather than 'bool* const'
     
-    auto empty = vector<int>();
+    // ****** THIS FUNCTION IS VULNERABLE TO REALLOCATIONS ******
+    
+    auto empty = vector<int>(2, 5);
     unordered_map<string, vector<int>> setsOfTimes [2] = {
         {
             {"mo", empty},
@@ -419,24 +405,30 @@ void testForConflict (const vector<Value*>* const input, vector<bool>::iterator 
             const string& component = **componentPtr;
             
             for (auto timePtr = course[component][0]["ti"].begin(); timePtr != course[component][0]["ti"].end(); timePtr++) {
-                Value& time = *timePtr;
+                const Value& time = *timePtr;
                 assert(time.isArray()); // QUICK DEBUG CODE
                 // NOTE: THE FOLLOWING SECTION WAS COPIED AND MODIFIED FROM ELSEWHERE! TRY TO ENCAPSULATE INTO A FUNCTION!
-                auto proposedTime = range(time_conversion(time[2].asInt(), time[3].asInt()), time_conversion(time[4].asInt(), time[5].asInt()));
+                auto proposedTime = range(time_conversion(time[2].asInt(), time[3].asInt()), time_conversion(time[4].asInt(), time[5].asInt()), 10); //Note: this will cause a collision if two classes are next to each other!
+                assert (proposedTime.size() > 0);
                 vector<int> result [2];
+                result[0].reserve((time_conversion(23, 30)-time_conversion(8, 30))/10);
+                result[1].reserve((time_conversion(23, 30)-time_conversion(8, 30))/10);
                 
                 // NOTE: CODE COPIED AND PASTED! REFACTOR!
                 switch (time[0].asInt()) {
                     case 3:
                     case 1: {
-                        assert(false); //The line below has an invalid pointer issue, investigate.
-                        vector<int>::const_iterator end = set_intersection(proposedTime.begin(),proposedTime.end(), setsOfTimes[0][time[1].asString()].begin(), setsOfTimes[0][time[1].asString()].end(), result[0].begin());
+                        //assert (false);
+                        //globalMutex.lock();
+                        //cout << quoteStripper(time[1].asString()) << endl;
+                        //globalMutex.unlock();
+                        vector<int>::const_iterator end = set_intersection(proposedTime.begin(), proposedTime.end(), setsOfTimes[0][quoteStripper(time[1].asString())].begin(), setsOfTimes[0][quoteStripper(time[1].asString())].end(), result[0].begin());
                         result[0].resize(end - result[0].begin()); //shink result vector to necessary size only
                         if ( time[0].asInt() == 1) //Allows for 3 to fall through
                             break;
                     }
                     case 2: {
-                        vector<int>::const_iterator end = set_intersection(proposedTime.begin(),proposedTime.end(), setsOfTimes[1][time[1].asString()].begin(), setsOfTimes[1][time[1].asString()].end(), result[1].begin());
+                        vector<int>::const_iterator end = set_intersection(proposedTime.begin(),proposedTime.end(), setsOfTimes[1][quoteStripper(time[1].asString())].begin(), setsOfTimes[1][quoteStripper(time[1].asString())].end(), result[1].begin());
                         result[1].resize(end - result[1].begin()); //shink result vector to necessary size only
                         break;
                     }
@@ -455,13 +447,13 @@ void testForConflict (const vector<Value*>* const input, vector<bool>::iterator 
                     switch (time[0].asInt()) {
                         case 3:
                         case 1:
-                            setsOfTimes[0][time[1].asString()].insert(setsOfTimes[0][time[1].asString()].end(), proposedTime.begin(), proposedTime.end()); //Concatenate the proposed time and the canonical
-                            sort(setsOfTimes[0][time[1].asString()].begin(), setsOfTimes[0][time[1].asString()].end()); //Sort the canonical time so that set_intersection works properly
+                            setsOfTimes[0][quoteStripper(time[1].asString())].insert(setsOfTimes[0][quoteStripper(time[1].asString())].end(), proposedTime.begin(), proposedTime.end()); //Concatenate the proposed time and the canonical
+                            sort(setsOfTimes[0][quoteStripper(time[1].asString())].begin(), setsOfTimes[0][quoteStripper(time[1].asString())].end()); //Sort the canonical time so that set_intersection works properly
                             if ( time[0].asInt() == 1) //Allows for 3 to fall through
                                 break;
                         case 2:
-                            setsOfTimes[1][time[1].asString()].insert(setsOfTimes[1][time[1].asString()].end(), proposedTime.begin(), proposedTime.end()); //Concatenate the proposed time and the canonical
-                            sort(setsOfTimes[1][time[1].asString()].begin(), setsOfTimes[1][time[1].asString()].end()); //Sort the canonical time so that set_intersection works properly
+                            setsOfTimes[1][quoteStripper(time[1].asString())].insert(setsOfTimes[1][quoteStripper(time[1].asString())].end(), proposedTime.begin(), proposedTime.end()); //Concatenate the proposed time and the canonical
+                            sort(setsOfTimes[1][quoteStripper(time[1].asString())].begin(), setsOfTimes[1][quoteStripper(time[1].asString())].end()); //Sort the canonical time so that set_intersection works properly
                             break;
                         default:
                             throw ("JSON structure corrupted! Course " + course["n"].asString() + " has a bad term condition!");
@@ -473,8 +465,124 @@ void testForConflict (const vector<Value*>* const input, vector<bool>::iterator 
     }
 }
 
+void TFCSetup(const vector<vector<Value*>>* const input, vector<bool>::iterator resultOut, vector<vector<Value*>>::const_iterator start, vector<vector<Value*>>::const_iterator end) {
+    
+    for (auto i = start; i != end; i++, resultOut++) {
+        testForConflict(&*i, resultOut);
+    }
+    
+}
+
+/*template <typename T>
+void vectorReverse (vector<T>& input) {
+    typename vector<T>::iterator left (input.begin()), right (input.end() - 1);
+    
+    while (left < right) {
+        
+        left++->swap(*right--);
+    }
+}*/
+
+void vectorReverse(vector<vector<Value*>*>& input) {
+    auto left (input.begin()), right (input.end() - 1);
+    while (left < right) {
+        //Address swap
+        auto temp = *left;
+        *left = *right;
+        *right = temp;
+        
+        right--;
+        left++;
+    }
+}
+
+long long partition(vector<vector<Value*>*>* alistPtr, unsigned long first, unsigned long last) {
+    unsigned long pivotvalue = alistPtr->at(first)->at(alistPtr->at(first)->size() - 1)->asDouble();
+    auto leftmark = first+1;
+    auto rightmark = last;
+    vector<vector<Value*>*>& alist = *alistPtr;
+
+    bool done = false;
+    while (!done) {
+
+        while (leftmark <= rightmark && alist[leftmark]->at(alist[leftmark]->size()-1)->asDouble() <= pivotvalue)
+            leftmark = leftmark + 1;
+
+        while (alist[rightmark]->at(alist[rightmark]->size()-1)->asDouble() >= pivotvalue && rightmark >= leftmark)
+            rightmark = rightmark -1;
+
+        if (rightmark < leftmark)
+        done = true;
+        else {
+            // Do some address swapping (faster than swapping vector contents)
+            auto temp = alist[leftmark];
+            alist[leftmark] = alist[rightmark];
+            alist[rightmark] = temp;
+            //alist[leftmark].swap(alist[rightmark]);
+        }
+    }
+    
+    // Do some address swapping (faster than swapping vector contents)
+    auto temp = alist[leftmark];
+    alist[leftmark] = alist[rightmark];
+    alist[rightmark] = temp;
 
 
+    return rightmark;
+}
+
+void quickSortHelper(vector<vector<Value*>*>* alist, unsigned long first, unsigned long last) {
+    if (first<last) {
+    
+        auto splitpoint = partition(alist,first,last);
+    
+        quickSortHelper(alist,first,splitpoint-1);
+        quickSortHelper(alist,splitpoint+1,last);
+    }
+}
+
+void modified_quickSort(vector<vector<Value*>*>* alist){
+    quickSortHelper(alist, 0, alist->size()-1);
+}
+
+void rankTimetable (vector<vector<Value*>*>* const inputPtr) {
+    for (auto candidatePtr = inputPtr->begin(); candidatePtr != inputPtr->end(); candidatePtr++) {
+        vector<Value*>& candidate = **candidatePtr;
+        
+        double totalWeight = 0;
+        for (auto coursePtr = candidate.begin(); coursePtr != candidate.end(); coursePtr++) {
+            Value& course = **coursePtr;
+            
+            double cWeight = 0;
+            unsigned int counter = 0;
+            if (course.isMember("c")) {
+                cWeight += course["c"][0]["sw"].asInt();
+                counter += 1;
+            }
+            if (course.isMember("tu")) {
+                cWeight += course["tu"][0]["sw"].asInt();
+                counter += 1;
+            }
+            if (course.isMember("l")) {
+                cWeight += course["l"][0]["sw"].asInt();
+                counter += 1;
+            }
+            course["cw"] = cWeight / counter;
+            totalWeight += cWeight / counter;
+        }
+        auto newDynamicAddress = new Value(totalWeight / candidate.size());
+        globalMutex.lock();
+        dynamicAllocations.push_back(newDynamicAddress);
+        globalMutex.unlock();
+        candidate.push_back(newDynamicAddress);
+    }
+    modified_quickSort(inputPtr);
+    
+    vectorReverse(*inputPtr);
+//Find aggregate weighting for each course, then each possibility
+//sort possibilities by weighting, high to low
+
+}
 
 
 /* NOTES TO DO:
@@ -482,6 +590,7 @@ void testForConflict (const vector<Value*>* const input, vector<bool>::iterator 
  OPTIMIZE VECTOR MEMORY USAGE!
  LOOK INTO USING THE HEAP WHERE APPROPRIATE!
  FIX CONST AND VECTORS/NESTED VECTORS!
+ OPTIMIZE testForConflicts AND INCORPORATE INTO THE TIMETABLE-GENERATING FUNCTION
  */
 
 
@@ -491,6 +600,9 @@ void testForConflict (const vector<Value*>* const input, vector<bool>::iterator 
 
 
 int main(int argc, const char * argv[]) {
+    globalTimer.start();
+    
+    assert (false); //CHOPPED OFF HALF MY SCHEDULE! DOUBLE CHECK PROCESSING.
     
     vector<thread> globalThreadIndex;
     
@@ -524,10 +636,21 @@ int main(int argc, const char * argv[]) {
             classes.push_back(root["courses"][departmentToGet][stoi(courseToGet)]); //add selected course to vector
         }
         
+        assert (globalTimer.lap() == 0);
+        
         for (auto iterator = classes.begin(); iterator != classes.end(); iterator++)
             globalThreadIndex.push_back(thread(weight_course,iterator));
         
+        assert (globalTimer.lap() == 0);
+        
+        cout << globalTimer.getLastDifference() << endl;
+        
         closeAllThreads(&globalThreadIndex);
+        
+        assert (globalTimer.lap() == 0);
+        assert (globalTimer.pause() == 0);
+        
+        cout << globalTimer.getLastDifference() << endl;
 
         //Now create array of possible configurations for each course, and reserve enough space for each
         vector<vector<Value>> courseConfigurations (classes.size(), vector<Value>());
@@ -535,38 +658,73 @@ int main(int argc, const char * argv[]) {
         for (int i = 0; i < courseConfigurations.size(); i++)
             courseConfigurations[i].reserve(100);
         
-        
+        assert (globalTimer.resume() == 0);
         //Iterate through each course, generating the variations
         for (vector<Value>::const_iterator iterator = classes.begin(); iterator != classes.end(); iterator++, configIter++) {
             globalThreadIndex.push_back(thread(GCVSetup,configIter, iterator));
         }
         
         closeAllThreads(&globalThreadIndex);
+        assert (globalTimer.lap() == 0);
+                
+        cout << globalTimer.getLastDifference() << endl;
         
         //Shrink all the class allocations down to their real size
         for (auto i = courseConfigurations.begin(); i != courseConfigurations.end(); i++) {
             i->shrink_to_fit();
         }
         
+        assert (globalTimer.lap() == 0);
+        
         vector<vector<Value*>> output; // Consider changing this to a list instead to escape reallocation hell
         output.reserve(1000000000); //Reserve space for one trillion combinations... may need more
         generateCombinations(&courseConfigurations, &output); //Find a way to multithread this
         
+        assert (globalTimer.lap() == 0);
+        
+        cout << globalTimer.getLastDifference() << endl;
+        
         vector<bool> conflictVector(output.size(), false); //Holds the list of timetable variations that are known to have conflicts
-        for (auto i = 0; i < output.size(); i++)
+        
+        // NOTE: Threads finish faster than they can be made! Make a set number of threads instead, and allocate them chunks to handle instead... or make a task scheduler that dynamically sends threads new blocks to process as they finish their assigned ones.
+        globalThreadIndex.reserve(std::thread::hardware_concurrency());
+        for (auto i = 0; i < std::thread::hardware_concurrency(); i++)
             //testForConflict(&(output[i]), &(conflictVector[i]));
-            globalThreadIndex.push_back(thread(testForConflict, &(output[i]), &(conflictVector[i])));
+            globalThreadIndex.push_back(thread(TFCSetup,&output, conflictVector.begin() + i * output.size()/std::thread::hardware_concurrency(), output.begin() + i * output.size()/std::thread::hardware_concurrency(), output.begin() + (i+1) * output.size()/std::thread::hardware_concurrency()));
         
         closeAllThreads(&globalThreadIndex);
         
-        //Discard all the schedule variations with conflicts
-        for (auto conflict = conflictVector.end() - 1; conflict != conflictVector.begin() - 1; conflict--) {
-            if (*conflict)
-                conflictVector.erase(conflict);
+        assert (globalTimer.lap() == 0);
+        cout << globalTimer.getLastDifference() << endl;
+        
+        //Discard all the schedule variations with conflicts by creating a new vector without the conflicts
+        vector<vector<Value*>*> cleanedOutput; // Consider changing this to a list instead to escape reallocation hell
+        output.reserve(output.size());
+        for (long long i = 0; i < conflictVector.size(); i++) {
+            if (!conflictVector[i]) {
+                //output.erase(output.begin() + i);
+                cleanedOutput.push_back(&output[i]); //this could be threaded where each of the threads generates a piece of cleanedOutput, then concatenates them all together at the end.
+            }
+        }
+        
+        assert (globalTimer.lap() == 0);
+        cout << globalTimer.getLastDifference() << endl;
+        
+        rankTimetable(&cleanedOutput);
+        
+        assert (globalTimer.lap() == 0);
+        cout << globalTimer.getLastDifference() << endl;
+        
+        for (auto i = 0; i < 10; i++) {
+            for (auto j = cleanedOutput[i]->begin(); j != cleanedOutput[i]->end(); j++) {
+                list_object(**j);
+            }
         }
         
         
-        cout << output[0].size() << " test " << output.size() << endl;
+        cout << "Intial size: " << output.size() << endl << "Final size: " << cleanedOutput.size() << endl;
+        assert (globalTimer.stop() == 0);
+        cout << globalTimer.getTotalTime() << endl;
     }
     else {
         cout << "The JSON file could not be read!" << endl;

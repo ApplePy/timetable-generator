@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C45E2B6E1B422EE400862132 /* timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C45E2B6C1B422EE400862132 /* timer.cpp */; };
 		C45FE2A71B348F58006AD6DD /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C45FE2A61B348F58006AD6DD /* main.cpp */; };
 		C45FE2B31B34A86C006AD6DD /* jsoncpp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C45FE2B21B34A86C006AD6DD /* jsoncpp.cpp */; };
 /* End PBXBuildFile section */
@@ -24,6 +25,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		C45E2B6C1B422EE400862132 /* timer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = timer.cpp; sourceTree = "<group>"; };
+		C45E2B6D1B422EE400862132 /* timer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = timer.hpp; sourceTree = "<group>"; };
 		C45FE2A31B348F58006AD6DD /* timetable-generator */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "timetable-generator"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C45FE2A61B348F58006AD6DD /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		C45FE2B11B34A218006AD6DD /* dist */ = {isa = PBXFileReference; lastKnownFileType = folder; path = dist; sourceTree = "<group>"; };
@@ -63,6 +66,8 @@
 			children = (
 				C45FE2B11B34A218006AD6DD /* dist */,
 				C45FE2A61B348F58006AD6DD /* main.cpp */,
+				C45E2B6C1B422EE400862132 /* timer.cpp */,
+				C45E2B6D1B422EE400862132 /* timer.hpp */,
 			);
 			path = "timetable-generator";
 			sourceTree = "<group>";
@@ -125,6 +130,7 @@
 			files = (
 				C45FE2A71B348F58006AD6DD /* main.cpp in Sources */,
 				C45FE2B31B34A86C006AD6DD /* jsoncpp.cpp in Sources */,
+				C45E2B6E1B422EE400862132 /* timer.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -241,6 +247,7 @@
 				C45FE2AC1B348F58006AD6DD /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
