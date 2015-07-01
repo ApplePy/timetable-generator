@@ -2,4 +2,150 @@
 <Bucket
    type = "1"
    version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "timetable-generator/main.cpp"
+            timestampString = "457421340.688207"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "145"
+            endingLineNumber = "145"
+            landmarkName = "main(int argc, const char * argv[])"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "timetable-generator/generation_and_conflict_resolution.cpp"
+            timestampString = "457420630.837135"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "81"
+            endingLineNumber = "81"
+            landmarkName = "generateCombinations(vector&lt;vector&lt;Value&gt;&gt;* const input, vector&lt;vector&lt;Value*&gt;&gt;* const output, unsigned int counter)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "generateCombinations(std::__1::vector&lt;std::__1::vector&lt;Json::Value, std::__1::allocator&lt;Json::Value&gt; &gt;, std::__1::allocator&lt;std::__1::vector&lt;Json::Value, std::__1::allocator&lt;Json::Value&gt; &gt; &gt; &gt;*, std::__1::vector&lt;std::__1::vector&lt;Json::Value*, std::__1::allocator&lt;Json::Value*&gt; &gt;, std::__1::allocator&lt;std::__1::vector&lt;Json::Value*, std::__1::allocator&lt;Json::Value*&gt; &gt; &gt; &gt;*, unsigned int)"
+                  moduleName = "timetable-generator"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/darrylmurray/Desktop/timetable-generator/timetable-generator/timetable-generator/generation_and_conflict_resolution.cpp"
+                  timestampString = "457420631.11841"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "83"
+                  endingLineNumber = "83"
+                  offsetFromSymbolStart = "2714">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "generateCombinations(std::__1::vector&lt;std::__1::vector&lt;Json::Value, std::__1::allocator&lt;Json::Value&gt; &gt;, std::__1::allocator&lt;std::__1::vector&lt;Json::Value, std::__1::allocator&lt;Json::Value&gt; &gt; &gt; &gt;*, std::__1::vector&lt;std::__1::vector&lt;Json::Value*, std::__1::allocator&lt;Json::Value*&gt; &gt;, std::__1::allocator&lt;std::__1::vector&lt;Json::Value*, std::__1::allocator&lt;Json::Value*&gt; &gt; &gt; &gt;*, unsigned int)"
+                  moduleName = "timetable-generator"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/darrylmurray/Desktop/timetable-generator/timetable-generator/timetable-generator/generation_and_conflict_resolution.cpp"
+                  timestampString = "457420631.118612"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "83"
+                  endingLineNumber = "83"
+                  offsetFromSymbolStart = "5062">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "timetable-generator/generation_and_conflict_resolution.cpp"
+            timestampString = "457420630.837135"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "63"
+            endingLineNumber = "63"
+            landmarkName = "generateCombinations(vector&lt;vector&lt;Value&gt;&gt;* const input, vector&lt;vector&lt;Value*&gt;&gt;* const output, unsigned int counter)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "timetable-generator/generation_and_conflict_resolution.cpp"
+            timestampString = "457420630.837135"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "72"
+            endingLineNumber = "72"
+            landmarkName = "generateCombinations(vector&lt;vector&lt;Value&gt;&gt;* const input, vector&lt;vector&lt;Value*&gt;&gt;* const output, unsigned int counter)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "timetable-generator/generation_and_conflict_resolution.cpp"
+            timestampString = "457420139.73866"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "55"
+            endingLineNumber = "55"
+            landmarkName = "generateCombinations(vector&lt;vector&lt;Value&gt;&gt;* const input, vector&lt;vector&lt;Value*&gt;&gt;* const output, unsigned int counter)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "timetable-generator/generation_and_conflict_resolution.cpp"
+            timestampString = "457420630.837135"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "60"
+            endingLineNumber = "60"
+            landmarkName = "generateCombinations(vector&lt;vector&lt;Value&gt;&gt;* const input, vector&lt;vector&lt;Value*&gt;&gt;* const output, unsigned int counter)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "timetable-generator/generation_and_conflict_resolution.cpp"
+            timestampString = "457421441.204918"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "87"
+            endingLineNumber = "87"
+            landmarkName = "generateCombinations(vector&lt;vector&lt;Value&gt;&gt;* const input, vector&lt;vector&lt;Value*&gt;&gt;* const output, unsigned int counter)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
 </Bucket>

@@ -10,6 +10,12 @@
 		C45E2B6E1B422EE400862132 /* timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C45E2B6C1B422EE400862132 /* timer.cpp */; };
 		C45FE2A71B348F58006AD6DD /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C45FE2A61B348F58006AD6DD /* main.cpp */; };
 		C45FE2B31B34A86C006AD6DD /* jsoncpp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C45FE2B21B34A86C006AD6DD /* jsoncpp.cpp */; };
+		C4739F011B4386EE00C03FA2 /* json_manipulation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4739EFF1B4386EE00C03FA2 /* json_manipulation.cpp */; };
+		C4739F041B43885400C03FA2 /* math_funcs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4739F021B43885400C03FA2 /* math_funcs.cpp */; };
+		C4739F071B43890E00C03FA2 /* weighting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4739F051B43890E00C03FA2 /* weighting.cpp */; };
+		C4739F0A1B438ECE00C03FA2 /* misc_funcs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4739F081B438ECE00C03FA2 /* misc_funcs.cpp */; };
+		C4739F0D1B43936D00C03FA2 /* sorting_and_ranking_functions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4739F0B1B43936D00C03FA2 /* sorting_and_ranking_functions.cpp */; };
+		C4739F101B43950500C03FA2 /* generation_and_conflict_resolution.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C4739F0E1B43950500C03FA2 /* generation_and_conflict_resolution.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -31,6 +37,18 @@
 		C45FE2A61B348F58006AD6DD /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		C45FE2B11B34A218006AD6DD /* dist */ = {isa = PBXFileReference; lastKnownFileType = folder; path = dist; sourceTree = "<group>"; };
 		C45FE2B21B34A86C006AD6DD /* jsoncpp.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jsoncpp.cpp; path = "timetable-generator/dist/jsoncpp.cpp"; sourceTree = "<group>"; };
+		C4739EFF1B4386EE00C03FA2 /* json_manipulation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = json_manipulation.cpp; sourceTree = "<group>"; };
+		C4739F001B4386EE00C03FA2 /* json_manipulation.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = json_manipulation.hpp; sourceTree = "<group>"; };
+		C4739F021B43885400C03FA2 /* math_funcs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = math_funcs.cpp; sourceTree = "<group>"; };
+		C4739F031B43885400C03FA2 /* math_funcs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = math_funcs.hpp; sourceTree = "<group>"; };
+		C4739F051B43890E00C03FA2 /* weighting.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = weighting.cpp; sourceTree = "<group>"; };
+		C4739F061B43890E00C03FA2 /* weighting.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = weighting.hpp; sourceTree = "<group>"; };
+		C4739F081B438ECE00C03FA2 /* misc_funcs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = misc_funcs.cpp; sourceTree = "<group>"; };
+		C4739F091B438ECE00C03FA2 /* misc_funcs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = misc_funcs.hpp; sourceTree = "<group>"; };
+		C4739F0B1B43936D00C03FA2 /* sorting_and_ranking_functions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sorting_and_ranking_functions.cpp; sourceTree = "<group>"; };
+		C4739F0C1B43936D00C03FA2 /* sorting_and_ranking_functions.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = sorting_and_ranking_functions.hpp; sourceTree = "<group>"; };
+		C4739F0E1B43950500C03FA2 /* generation_and_conflict_resolution.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = generation_and_conflict_resolution.cpp; sourceTree = "<group>"; };
+		C4739F0F1B43950500C03FA2 /* generation_and_conflict_resolution.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = generation_and_conflict_resolution.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,6 +86,18 @@
 				C45FE2A61B348F58006AD6DD /* main.cpp */,
 				C45E2B6C1B422EE400862132 /* timer.cpp */,
 				C45E2B6D1B422EE400862132 /* timer.hpp */,
+				C4739EFF1B4386EE00C03FA2 /* json_manipulation.cpp */,
+				C4739F001B4386EE00C03FA2 /* json_manipulation.hpp */,
+				C4739F021B43885400C03FA2 /* math_funcs.cpp */,
+				C4739F031B43885400C03FA2 /* math_funcs.hpp */,
+				C4739F051B43890E00C03FA2 /* weighting.cpp */,
+				C4739F061B43890E00C03FA2 /* weighting.hpp */,
+				C4739F081B438ECE00C03FA2 /* misc_funcs.cpp */,
+				C4739F091B438ECE00C03FA2 /* misc_funcs.hpp */,
+				C4739F0B1B43936D00C03FA2 /* sorting_and_ranking_functions.cpp */,
+				C4739F0C1B43936D00C03FA2 /* sorting_and_ranking_functions.hpp */,
+				C4739F0E1B43950500C03FA2 /* generation_and_conflict_resolution.cpp */,
+				C4739F0F1B43950500C03FA2 /* generation_and_conflict_resolution.hpp */,
 			);
 			path = "timetable-generator";
 			sourceTree = "<group>";
@@ -128,9 +158,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C4739F011B4386EE00C03FA2 /* json_manipulation.cpp in Sources */,
+				C4739F0D1B43936D00C03FA2 /* sorting_and_ranking_functions.cpp in Sources */,
 				C45FE2A71B348F58006AD6DD /* main.cpp in Sources */,
 				C45FE2B31B34A86C006AD6DD /* jsoncpp.cpp in Sources */,
+				C4739F0A1B438ECE00C03FA2 /* misc_funcs.cpp in Sources */,
 				C45E2B6E1B422EE400862132 /* timer.cpp in Sources */,
+				C4739F071B43890E00C03FA2 /* weighting.cpp in Sources */,
+				C4739F101B43950500C03FA2 /* generation_and_conflict_resolution.cpp in Sources */,
+				C4739F041B43885400C03FA2 /* math_funcs.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
