@@ -22,8 +22,8 @@ double weight_time(const int startTime, const int endTime) {
     vector<int>::const_iterator end = set_intersection(lunchSet.begin(),lunchSet.end(), classSet.begin(), classSet.end(), result.begin());
     result.resize(end - result.begin()); //shink result vector to necessary size only
     
-    if (result.size() > 0)
-        weight -= 1300;
+    //if (result.size() > 0)
+        //weight -= 1300;
     weight -= pow(startTime, 1.2);
     weight += (endTime - startTime) * 5;
     

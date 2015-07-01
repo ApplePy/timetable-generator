@@ -137,9 +137,9 @@ int main(int argc, const char * argv[]) {
     output.reserve(1000000000); //Reserve space for one trillion combinations... may need more
     generateCombinations(&courseConfigurations, &output); //Find a way to multithread this
     
-    
-    vector<Value*>& test = output[0];
-    vector<Value*>& test2 = output[54345];
+ //******************************************
+ ///NOTE REMEMBER TO ADD IN A RANKING FUNCTION THAT PUTS CLASSES CLOSER TOGETHER, AND PRIORITIZES CLASSES YOU WANT TO SHARE WITH FRIENDS
+    //*****************************************
     
     
     assert (globalTimer.lap() == 0);
