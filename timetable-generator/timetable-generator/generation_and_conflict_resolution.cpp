@@ -80,13 +80,6 @@ void generateCombinations(vector<vector<Value>>* const input, vector<vector<Valu
             offset += sz;
         }
     }
-    
-    //Total kludge to avoid having to fix the mistake in the algorithm
-    for (auto n = --output->end(); n != --output->begin(); n--) {
-        if (n->size() + counter != input->size())
-            n = output->erase(n);
-    }
-    
 }
 
 void testForConflict (const vector<Value*>* const input, vector<bool>::iterator resultOut) {
