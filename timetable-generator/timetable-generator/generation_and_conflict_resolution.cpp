@@ -65,7 +65,7 @@ void generateCombinations(vector<vector<Value>>* const input, vector<vector<Valu
         auto sz = output->size();
         
         // Iterate through the input container's list of course variations, and duplicate the output vector as necessary to append this class
-        for (auto i = input->at(counter).begin(); i != input->at(counter).end(); i++) {
+        for (auto i = ++input->at(counter).begin(); i != input->at(counter).end(); i++) { //++begin to prevent creating one-too-many copies
             for (auto n = 0; n < sz; n++) {
                 output->push_back(output->at(n)); //the switch from iterators to index numbers escapes the reallocation dangers - but makes output incapable of being switched to a list
             }
