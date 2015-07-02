@@ -7,16 +7,3 @@
 //
 
 #include "misc_funcs.hpp"
-
-void vectorReverse(vector<vector<Value*>*>& input) {
-    auto left (input.begin());
-    auto right (--input.end()); //start one before the end of the container
-    while (left < right) {
-        //Address swap
-        auto temp = *right;
-        *right = *left;
-        *left = temp;
-        --right;
-        ++left;
-    }
-}

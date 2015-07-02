@@ -11,9 +11,11 @@
 
 #include <vector>
 #include <list>
+#include <algorithm>
 #include "misc_funcs.hpp"
 #include "dist/json/json.h"
 
+using std::reverse;
 using std::vector;
 using Json::Value;
 

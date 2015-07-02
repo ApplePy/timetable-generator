@@ -92,7 +92,7 @@ void rankTimetable (vector<vector<Value*>*>* const inputPtr) {
     }
     modified_quickSort(inputPtr);
     
-    vectorReverse(*inputPtr);
+    reverse(inputPtr->begin(), inputPtr->end());
     //Find aggregate weighting for each course, then each possibility
     //sort possibilities by weighting, high to low
     

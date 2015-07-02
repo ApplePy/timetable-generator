@@ -31,20 +31,4 @@ void closeAllThreads (T* threadIndex) {
     threadIndex->clear(); //delete all items now that they've been joined
 }
 
-///Reverses the order of a given vector
-/*template <typename T>
-void vectorReverse(vector<T>& input) {
-    auto left (input.begin());
-    auto right (--input.end()); //start one before the end of the container
-    while (left < right) {
-        //Address swap
-        left->swap(*right);
-        --right;
-        ++left;
-    }
-}*/
-
-///Reverses the order of a given vector
-void vectorReverse(vector<vector<Value*>*>& input);
-
 #endif /* misc_funcs_cpp */
