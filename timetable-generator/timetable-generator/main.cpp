@@ -47,7 +47,7 @@ int main(int argc, const char * argv[]) {
     
     
     //Open file
-    fstream file("/Users/darrylmurray/Desktop/timetable-generator/data.json", ios::in);
+    fstream file("/Users/darrylmurray/Documents/Programming/timetable-generator/data.json", ios::in);
     assert(file.is_open());
     stringstream buffer;
     buffer << file.rdbuf();
